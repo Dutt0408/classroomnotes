@@ -28,7 +28,11 @@ export const ReactFinalFormDemo = () => {
 
 
   const [showMessage, setShowMessage] = useState(false);
+  const [selectedCountry,setSelectedCountry ] = useState('');
   const [formData] = useState({});
+
+  
+
  
 
   const [date, setDate] = useState(null);
@@ -153,6 +157,10 @@ export const ReactFinalFormDemo = () => {
     label: college.name,
     value: college.id,
   }));
+  const countryCodes = [
+    { label: '+1', value: '+1' },
+    { label: '+91', value: '+91' },
+  ];
 
 
   const Status = [
@@ -203,6 +211,8 @@ export const ReactFinalFormDemo = () => {
   
     if (!data.PhoneNumber) {
       errors.PhoneNumber = "Phone Number is required.";
+    } else if (!/^\d{10}$/.test(data.PhoneNumber)) {
+      errors.PhoneNumber = "Please enter a valid 10-digit  phone number.";
     }
   
     if (!data.CanadianStatus) {
@@ -221,11 +231,15 @@ export const ReactFinalFormDemo = () => {
     
     const formEle = document.querySelector("form");
     const formData = new FormData(formEle);
-    console.log("FormData:", formData);
+
 
     const data = {};
     formData.forEach((value, key) => {
-     
+      if (key === "PhoneNumber") {
+        // Remove non-numeric characters from the phone number
+        value = value.replace(/\D/g, "");
+      }
+  
       // Handle checkboxes separately to ensure boolean value
       data[key] = key === "accept" ? value === "on" : value;
     });
@@ -388,29 +402,63 @@ export const ReactFinalFormDemo = () => {
                     </div>
                   )}
                 />
-                <Field
-                  name="PhoneNumber"
-                  render={({ input, meta }) => (
-                    <div className="field">
-                      <span className="p-float-label">
-                        <InputText
-                          id="PhoneNumber"
-                          {...input}
-                          className={` ${
-                            isFormFieldValid(meta) && "p-invalid"
-                          }`}
-                        />
-                        <label
-                          htmlFor="PhoneNumber"
-                          className={`${isFormFieldValid(meta) && "p-error"}`}
-                        >
-                          Phone Number*
-                        </label>
-                      </span>
-                      {getFormErrorMessage(meta)}
-                    </div>
-                  )}
-                />
+   <div className="flex">
+  <Field
+    name="CountryCode"
+    render={({ input, meta }) => (
+      <div className="field" style={{ width: '30%', marginRight: '1rem' }}>
+        <span className="p-float-label">
+          <Dropdown
+            id="CountryCode"
+            name="CountryCode"
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.value)}
+            options={countryCodes}
+            placeholder="Country Code"
+          />
+          <label htmlFor="CountryCode">CC</label>
+        </span>
+        {getFormErrorMessage(meta)}
+      </div>
+    )}
+  />
+
+  <Field
+    name="PhoneNumber"
+    render={({ input, meta }) => (
+      <div className="field" style={{ width: '70%', marginRight: '1rem' }}>
+        <span className="p-float-label">
+          <InputText
+            type="tel"
+            id="PhoneNumber"
+            {...input}
+            onInput={(e) => {
+              let numericValue = e.target.value.replace(/\D/g, ''); // Allow only numeric input
+              e.target.value = numericValue.slice(0, 10); // Truncate to a maximum of 10 digits
+            }}
+            pattern="[0-9]{10}"
+            title="Please enter a valid 10-digit phone number."
+            className={`${
+              isFormFieldValid(meta) && "p-invalid"
+            }`}
+          />
+          <label
+            htmlFor="PhoneNumber"
+            className={`${isFormFieldValid(meta) && "p-error"}`}
+          >
+            Phone Number*
+          </label>
+        </span>
+        {getFormErrorMessage(meta)}
+      </div>
+    )}
+  />
+</div>
+
+
+
+
+
                 {/* <Field
                   name="DateofBirth"
                   render={({ input }) => (
