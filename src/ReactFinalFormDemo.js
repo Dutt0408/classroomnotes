@@ -80,7 +80,8 @@ export const ReactFinalFormDemo = () => {
     { name: "Cambridge", id: "Cambridge" },
     { name: "Hamilton", id: "Hamilton" },
     { name: "Oakville", id: "Oakville" },
-    { name: "Scarborough", id: "Scarborough" }
+    { name: "Scarborough", id: "Scarborough" },
+    { name: "Other", id: "Other" }
   ];
 
 
