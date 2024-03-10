@@ -215,6 +215,16 @@ export const ReactFinalFormDemo = () => {
     } else if (!/^\d{10}$/.test(data.PhoneNumber)) {
       errors.PhoneNumber = "Please enter a valid 10-digit  phone number.";
     }
+    if (!data.CountryCode) {
+      errors.PhoneNumber = "Phone Number is required.";
+    } else if (!/^\d{10}$/.test(data.CountryCode)) {
+      errors.CountryCode = "Please enter a valid CC.";
+    }
+    if (!data.Email) {
+      errors.PhoneNumber = "Phone Number is required.";
+    } else if (!/^\d{10}$/.test(data.Email)) {
+      errors.Email = "Please enter a valid Email.";
+    }
   
     if (!data.CanadianStatus) {
       errors.CanadianStatus = "Canadian Status is required.";
