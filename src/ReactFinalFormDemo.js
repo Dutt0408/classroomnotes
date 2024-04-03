@@ -213,17 +213,17 @@ export const ReactFinalFormDemo = () => {
     if (!data.PhoneNumber) {
       errors.PhoneNumber = "Phone Number is required.";
     } else if (!/^\d{10}$/.test(data.PhoneNumber)) {
-      errors.PhoneNumber = "Please enter a valid 10-digit  phone number.";
+      errors.PhoneNumber = "Please enter a valid 10-digit phone number.";
     }
+  
     if (!data.CountryCode) {
-      errors.PhoneNumber = "Phone Number is required.";
-    } else if (!/^\d{10}$/.test(data.CountryCode)) {
-      errors.CountryCode = "Please enter a valid CC.";
+      errors.CountryCode = "Country Code is required.";
+    } else if (!/^\d{1,4}$/.test(data.CountryCode)) {
+      errors.CountryCode = "Please enter a valid country code.";
     }
-    if (!data.Email) {
-      errors.PhoneNumber = "Phone Number is required.";
-    } else if (!/^\d{10}$/.test(data.Email)) {
-      errors.Email = "Please enter a valid Email.";
+  
+    if (!data.City) {
+      errors.City = "City is required.";
     }
   
     if (!data.CanadianStatus) {
@@ -236,6 +236,8 @@ export const ReactFinalFormDemo = () => {
   
     return errors;
   };
+  
+
   
 
   function Submit() {
