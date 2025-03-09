@@ -5,7 +5,8 @@ import "primeflex/primeflex.css";
 import "./apple.css";
 import "./image.css"
 
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Form, Field } from "react-final-form";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -30,15 +31,8 @@ export const ReactFinalFormDemo = () => {
   const [showMessage, setShowMessage] = useState(false);
   const [selectedCountry,setSelectedCountry ] = useState('');
   const [formData] = useState({});
-
-  
-
- 
-
   const [date, setDate] = useState(null);
-
   const [selectedstats, setSelectedstats] = useState(null);
-
   const fieldsData = [
     { id: "Mechanical", name: "Mechanical" },
     { id: "IT", name: "Information Technology (IT)" },
@@ -163,6 +157,17 @@ export const ReactFinalFormDemo = () => {
     { label: '+91', value: '+91' },
   ];
 
+  const images = [
+    "https://img.peapix.com/15944424508851487235_1080.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/055a_Ashmita_Din_Toronto_June18__NYN0225_001.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/056dd_Ashmita_Din_Toronto_June18_DBRT4531_001.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/066a_Ashmita_Din_Toronto_June18_DBRT4743.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/053i_Ashmita_Din_Toronto_June18_MGB02374.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/053e_Ashmita_Din_Toronto_June18__NYN0150A_001.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/053e_Ashmita_Din_Toronto_June18__NYN0174A_001.jpg",
+    "https://www.baps.org/Data/Sites/1/Media/GalleryImages/27390/WebImages/056a_Ashmita_Din_Toronto_June18__NYN0257_001.jpg"
+  ];
+  
 
   const Status = [
     {
@@ -191,6 +196,7 @@ export const ReactFinalFormDemo = () => {
     },
   ];
 
+  
  
  
   const validate = (data) => {
@@ -284,6 +290,15 @@ export const ReactFinalFormDemo = () => {
       isFormFieldValid(meta) && <small className="p-error">{meta.error}</small>
     );
   };
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+  
 
   const dialogFooter = (
     <div className="flex justify-content-center">
@@ -299,12 +314,29 @@ export const ReactFinalFormDemo = () => {
   return (
     
     <div className="form-demo">
-       <div className="header">
-        <img className="imgheader" src="https://na.baps.org/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fhero2.79f635ad.jpg&w=3840&q=75" alt="HeaderImage"  />
-        <div className="header-text">
-        <h1 className="RegText"> Sabha Registration</h1>
+      <div className="imgheader">
+        
+      <div className="imgheader relative w-full h-[50vh] md:h-[65vh] lg:h-[85vh] xl:h-[115vh] overflow-hidden rounded-lg">
+      <AnimatePresence>
+            <motion.img
+              key={images[index]}
+              src={images[index]}
+              className="absolute w-full h-full object-cover"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              alt="Sliding Image"
+            />
+          </AnimatePresence>
         </div>
       </div>
+    <div className="header">
+      
+      <div className="header-text">
+        <h1 className="RegText"> Sabha Registration</h1>
+      </div>
+    </div>
 
       <Dialog
         visible={showMessage}

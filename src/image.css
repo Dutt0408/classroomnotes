@@ -8,10 +8,13 @@
     object-fit: cover;
 
   }
-  .imgheader {
-    height: 35vh;
-    overflow: hidden; /* Ensures no content overflow */
-  }
+  
+.imgheader {
+  width: 100%;
+  
+  overflow: hidden;
+  position: relative; /* Keeps it in normal flow */
+}
   .footer{
     background-color: #cccccc84;
     height: 8.3em;
@@ -68,15 +71,15 @@ text-align: center;
 }
 
 
-@media screen and (min-width:729px )and (max-width: 1061px)  {
+@media screen and (min-width:729px )and (max-width: 3000px)  {
     .imgheader {
         width: 100%;
-        height: auto; /* To maintain the aspect ratio */
+     
         object-fit: cover;
     
       }
       .imgheader {
-        height: 35vh;
+        height: 75vh;
         overflow: hidden; /* Ensures no content overflow */
       }
       .footer{
@@ -136,7 +139,12 @@ text-align: center;
 }
 @media screen and (min-width:100px )and (max-width: 350px)  {
    
-      
+  .imgheader {
+    width: 100%;
+    height: 35vh;
+    overflow: hidden;
+    position: relative; /* Keeps it in normal flow */
+  }
       
     .RegText{
         /* margin-top: -4em; */
@@ -152,12 +160,12 @@ text-align: center;
 @media screen and (min-width:1062px )and (max-width: 1263px)  {
     .imgheader {
         width: 100%;
-        height: auto; /* To maintain the aspect ratio */
+     
         object-fit: cover;
     
       }
       .imgheader {
-        height: 35vh;
+        height: 75vh;
         overflow: hidden; /* Ensures no content overflow */
       }
       .footer{
@@ -269,6 +277,12 @@ text-align: center;
   .form-demo .card {
     width: 90% !important;
     min-width: 0 !important;
+  }
+  .imgheader {
+    width: 100%;
+    height: 35vh;
+    overflow: hidden;
+    position: relative; /* Keeps it in normal flow */
   }
 }
 
