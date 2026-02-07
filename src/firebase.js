@@ -1,21 +1,26 @@
-// src/firebase.js
-
-// Import Firebase v9+ modules
+// src/firebase.js in your SECOND app
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 
-// Your Firebase configuration
+// Load from environment variables - MUST BE SAME AS FIRST APP!
 const firebaseConfig = {
-  apiKey: "AIzaSyDEFAULT_KEY_CHANGE_THIS",
-  authDomain: "ravisabha-registration.firebaseapp.com",
-  databaseURL: "https://ravisabha-registration-default-rtdb.firebaseio.com",
-  projectId: "ravisabha-registration",
-  storageBucket: "ravisabha-registration.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890",
-  measurementId: "G-ABCDEF1234"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL, // This is the critical one!
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
+
+// Log for debugging
+console.log('Registration App Firebase Config:', {
+  databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  apiKeyLoaded: !!process.env.REACT_APP_FIREBASE_API_KEY
+});
 
 // Initialize Firebase
 let app;
@@ -26,48 +31,11 @@ try {
   app = initializeApp(firebaseConfig);
   database = getDatabase(app);
   auth = getAuth(app);
-  console.log('✅ Firebase initialized successfully');
+  console.log('✅ Registration App Firebase initialized with database:', process.env.REACT_APP_FIREBASE_DATABASE_URL);
 } catch (error) {
-  console.error('❌ Firebase initialization error:', error);
-  // Create mock database for development
-  database = createMockDatabase();
-}
-
-// Mock database for development if Firebase fails
-function createMockDatabase() {
-  console.warn('⚠️ Using mock database - no real Firebase connection');
-  
-  return {
-    ref: (path) => ({
-      key: path.split('/').pop(),
-      path: path,
-      toString: () => path
-    }),
-    get: async (ref) => ({
-      exists: () => false,
-      val: () => null
-    }),
-    set: async (ref, data) => {
-      console.log('Mock set:', ref.path, data);
-      return Promise.resolve();
-    },
-    update: async (ref, data) => {
-      console.log('Mock update:', ref.path, data);
-      return Promise.resolve();
-    },
-    remove: async (ref) => {
-      console.log('Mock remove:', ref.path);
-      return Promise.resolve();
-    },
-    push: (ref) => ({
-      key: `mock_${Date.now()}`,
-      ref: ref
-    }),
-    onValue: (ref, callback) => {
-      console.log('Mock onValue listener added:', ref.path);
-      return () => console.log('Mock listener removed');
-    }
-  };
+  console.error('❌ Registration App Firebase initialization error:', error);
+  console.error('Please check your .env file and make sure it matches the first app');
+  throw error;
 }
 
 export { database, auth };
