@@ -172,6 +172,8 @@ const RegistrationForm = () => {
                       <option value="">Select Region</option>
                       <option>Toronto</option>
                       <option>Brampton</option>
+                      <option>Etobicoke</option>
+                      <option>Northyork</option>
                       <option>Mississauga</option>
                       <option>Other</option>
                     </select>
