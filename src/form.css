@@ -1,0 +1,167 @@
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --bg: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --error: #ef4444;
+    --success: #10b981;
+    --radius: 12px;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+  
+  * { box-sizing: border-box; }
+  
+  .rs-container {
+    min-height: 100vh;
+    background-color: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--text-main);
+  }
+  
+  .rs-container.center { align-items: center; }
+  
+  .rs-form-wrapper {
+    width: 100%;
+    max-width: 480px;
+  }
+  
+  /* Card Styling */
+  .rs-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  
+  .rs-header { text-align: center; margin-bottom: 32px; }
+  .rs-header h1 { font-size: 28px; margin: 12px 0 8px; color: #0f172a; }
+  .rs-header p { color: var(--text-muted); font-size: 15px; }
+  
+  .rs-logo-area {
+    width: 64px;
+    height: 64px;
+    background: #dbeafe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  .rs-main-icon { font-size: 32px; color: var(--primary); }
+  
+  /* Form Fields */
+  .rs-form { display: flex; flex-direction: column; gap: 20px; }
+  .rs-field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #475569; }
+  
+  .rs-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .rs-input-icon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 18px;
+  }
+  
+  .rs-input-wrapper input, .rs-input-wrapper select {
+    width: 100%;
+    padding: 12px 12px 12px 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.2s;
+    background: #fff;
+  }
+  
+  .rs-input-wrapper input:focus, .rs-input-wrapper select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+  
+  .rs-input-group.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  
+  /* Buttons */
+  .rs-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 16px;
+  }
+  
+  .rs-btn.primary { background: var(--primary); color: white; width: 100%; }
+  .rs-btn.primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  .rs-btn.primary:disabled { opacity: 0.7; cursor: not-allowed; }
+  
+  /* Status Indicators */
+  .rs-badge-row { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+  .rs-status-badge {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    background: #f1f5f9;
+    border-radius: 20px;
+    color: #64748b;
+  }
+  
+  .rs-alert {
+    padding: 12px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: var(--error);
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .rs-icon-badge {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    margin: 0 auto 20px;
+  }
+  .rs-icon-badge.success { background: #dcfce7; color: var(--success); }
+  .rs-icon-badge.error { background: #fee2e2; color: var(--error); }
+  
+  /* Animations */
+  .animate-in {
+    animation: slideUp 0.5s ease-out;
+  }
+  
+  .rs-spinner { animation: spin 1s linear infinite; }
+  
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  
+  /* Responsive */
+  @media (max-width: 480px) {
+    .rs-input-group.row { grid-template-columns: 1fr; }
+    .rs-card { padding: 24px; }
+  }
