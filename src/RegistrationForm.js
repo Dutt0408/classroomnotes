@@ -45,14 +45,19 @@ const RegistrationForm = () => {
         
         if (snapshot.exists()) {
           const data = snapshot.val();
-          
-          // Check if token is expired or used
-          const now = new Date();
-          const expiresAt = new Date(data.expiresAt);
-          
-          if (expiresAt < now || data.used) {
+        
+          const now = Date.now();
+          const expiresAt = new Date(data.expiresAt).getTime();
+        
+          if (
+            !data.expiresAt ||
+            isNaN(expiresAt) ||
+            expiresAt < now ||
+            data.used === true ||
+            data.status !== 'active'
+          ) {
             setTokenValid(false);
-            setError('This QR code has expired or has been used');
+            setError('This QR code has expired or is inactive');
           } else {
             setTokenValid(true);
             setTokenData(data);
@@ -61,6 +66,7 @@ const RegistrationForm = () => {
           setTokenValid(false);
           setError('Invalid QR code');
         }
+        
       } catch (err) {
         console.error('Error validating token:', err);
         setTokenValid(false);
