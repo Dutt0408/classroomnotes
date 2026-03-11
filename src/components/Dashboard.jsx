@@ -26,16 +26,48 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#f0f0f0', fontFamily: 'system-ui, sans-serif' }}>
-      <div style={{ borderBottom: '1px solid #1e1e2e', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #6c63ff, #ff6584)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>⚡</div>
-          <span style={{ fontWeight: 700, fontSize: 18 }}>Online Classroom </span>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setView('grid')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: view === 'grid' ? '#6c63ff' : '#1e1e2e', color: '#fff', cursor: 'pointer', fontSize: 13 }}>⊞ Grid</button>
-          <button onClick={() => setView('list')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: view === 'list' ? '#6c63ff' : '#1e1e2e', color: '#fff', cursor: 'pointer', fontSize: 13 }}>☰ List</button>
-        </div>
+    {/* Header */}
+    <div style={{ borderBottom: '1px solid #1e1e2e', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <img src="/logo.png" style={{ width: 32, height: 32, objectFit: 'contain' }} alt="Logo" />
+        <span style={{ fontWeight: 700, fontSize: 18 }}>Online Classroom</span>
       </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={() => setView('grid')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: view === 'grid' ? '#6c63ff' : '#1e1e2e', color: '#fff', cursor: 'pointer', fontSize: 13 }}>⊞ Grid</button>
+        <button onClick={() => setView('list')} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: view === 'list' ? '#6c63ff' : '#1e1e2e', color: '#fff', cursor: 'pointer', fontSize: 13 }}>☰ List</button>
+      </div>
+    </div>
+
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 40px 40px 40px' }}>
+  
+  {/* Inspiration Image with Aesthetic Overlay */}
+  <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 32, border: '1px solid #1e1e2e' }}>
+    <img 
+      src="https://firebasestorage.googleapis.com/v0/b/french-d9d47.firebasestorage.app/o/61.jpeg?alt=media&token=2c242267-bebd-4735-9072-4511ed4e178c" 
+      alt="Inspiration" 
+      style={{ 
+        width: '100%', 
+        maxHeight: '720px', 
+        objectFit: 'cover',
+        display: 'block'
+      }}
+    />
+    <div style={{
+      position: 'absolute',
+      bottom: '20px',
+      right: '25px',
+      color: '#ffffff',
+      fontSize: '18px',
+      fontWeight: '300',
+      letterSpacing: '1px',
+      fontStyle: 'italic',
+      textShadow: '0px 2px 10px rgba(0,0,0,0.5)',
+      pointerEvents: 'none'
+    }}>
+      MahantSwami Maharaj vicharan in France 🇫🇷
+    </div>
+  </div>
+  </div>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: 40 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 48 }}>
