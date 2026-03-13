@@ -1,9 +1,23 @@
 /* eslint-disable */
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../hooks/useSession';
-import { ref, set, get, serverTimestamp } from 'firebase/database';
+import { ref, set, get, onValue } from 'firebase/database';
 import { db } from '../firebase';
+
+// Extract YouTube video ID from any YouTube URL format
+function getYouTubeId(url) {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
 
 /**
  * ViewerView — PDF-editor style
@@ -27,6 +41,9 @@ export default function ViewerView() {
   const [size, setSize] = useState(3);
   const [saved, setSaved] = useState(false);
   const [slideNotes, setSlideNotes] = useState({}); // { slideId: text }
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [showYoutubePlayer, setShowYoutubePlayer] = useState(false);
+  const [ytPanelHeight, setYtPanelHeight] = useState(300);
 
   // Canvas ref is stable — we manage drawing state via refs to avoid re-renders erasing the canvas
   const canvasRef = useRef();
@@ -59,6 +76,17 @@ export default function ViewerView() {
       img.src = ann.dataUrl;
     }
   }, [currentIdx, currentSlide?.id, annotations]);
+
+  // ─── Load + live-sync YouTube URL from Firebase ───────────────────────────
+  useEffect(() => {
+    if (!id) return;
+    const unsub = onValue(ref(db, `sessions/${id}/youtubeUrl`), (snap) => {
+      const url = snap.exists() ? snap.val() : '';
+      setYoutubeUrl(url || '');
+      if (url && getYouTubeId(url)) setShowYoutubePlayer(true);
+    });
+    return () => unsub();
+  }, [id]);
 
   // ─── Load notes for current slide ─────────────────────────────────────────
   useEffect(() => {
@@ -272,7 +300,33 @@ export default function ViewerView() {
         }}>
           {isFollowing ? '● Following' : 'Follow'}
         </button>
+
+        {/* YouTube toggle — only show if there's a live stream set */}
+        {getYouTubeId(youtubeUrl) && (
+          <button onClick={() => setShowYoutubePlayer(v => !v)} style={{
+            padding: '6px 12px', borderRadius: 6, border: '1px solid #ddd',
+            background: showYoutubePlayer ? '#ff0000' : '#fff',
+            color: showYoutubePlayer ? '#fff' : '#c00',
+            cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            {showYoutubePlayer ? (
+              <><span>▼</span><span>Hide Stream</span></>
+            ) : (
+              <><span>▶</span><span>Watch Live</span><span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ff0000', display: 'inline-block', boxShadow: '0 0 5px #ff0000' }} /></>
+            )}
+          </button>
+        )}
       </div>
+
+      {/* ── FLOATING DRAGGABLE YOUTUBE PLAYER ── */}
+      {getYouTubeId(youtubeUrl) && showYoutubePlayer && (
+        <DraggableYouTubePlayer
+          videoId={getYouTubeId(youtubeUrl)}
+          url={youtubeUrl}
+          onClose={() => setShowYoutubePlayer(false)}
+        />
+      )}
 
       {/* ── MAIN SCROLLABLE CONTENT ── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '28px 0 60px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -403,6 +457,167 @@ export default function ViewerView() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Draggable floating YouTube player ────────────────────────────────────────
+function DraggableYouTubePlayer({ videoId, url, onClose }) {
+  const [pos, setPos] = React.useState({ x: window.innerWidth - 460, y: 80 });
+  const [size, setSize] = React.useState({ w: 440, h: 260 });
+  const [minimized, setMinimized] = React.useState(false);
+  const dragging = React.useRef(false);
+  const resizingRef = React.useRef(false);
+  const dragOffset = React.useRef({ x: 0, y: 0 });
+  const resizeStart = React.useRef({ x: 0, y: 0, w: 0, h: 0 });
+
+  // Drag
+  const onDragStart = (e) => {
+    e.preventDefault();
+    dragging.current = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragOffset.current = { x: clientX - pos.x, y: clientY - pos.y };
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('touchend', onDragEnd);
+  };
+  const onDragMove = (e) => {
+    if (!dragging.current) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = Math.max(0, Math.min(window.innerWidth - size.w, clientX - dragOffset.current.x));
+    const y = Math.max(0, Math.min(window.innerHeight - 40, clientY - dragOffset.current.y));
+    setPos({ x, y });
+  };
+  const onDragEnd = () => {
+    dragging.current = false;
+    window.removeEventListener('mousemove', onDragMove);
+    window.removeEventListener('mouseup', onDragEnd);
+    window.removeEventListener('touchmove', onDragMove);
+    window.removeEventListener('touchend', onDragEnd);
+  };
+
+  // Resize from bottom-right corner
+  const onResizeStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resizingRef.current = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    resizeStart.current = { x: clientX, y: clientY, w: size.w, h: size.h };
+    window.addEventListener('mousemove', onResizeMove);
+    window.addEventListener('mouseup', onResizeEnd);
+    window.addEventListener('touchmove', onResizeMove, { passive: false });
+    window.addEventListener('touchend', onResizeEnd);
+  };
+  const onResizeMove = (e) => {
+    if (!resizingRef.current) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const w = Math.max(280, resizeStart.current.w + (clientX - resizeStart.current.x));
+    const h = Math.max(160, resizeStart.current.h + (clientY - resizeStart.current.y));
+    setSize({ w, h });
+  };
+  const onResizeEnd = () => {
+    resizingRef.current = false;
+    window.removeEventListener('mousemove', onResizeMove);
+    window.removeEventListener('mouseup', onResizeEnd);
+    window.removeEventListener('touchmove', onResizeMove);
+    window.removeEventListener('touchend', onResizeEnd);
+  };
+
+  const sizes = [
+    { label: 'S', w: 320, h: 190 },
+    { label: 'M', w: 440, h: 260 },
+    { label: 'L', w: 640, h: 380 },
+  ];
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        left: pos.x, top: pos.y,
+        width: size.w,
+        zIndex: 9999,
+        borderRadius: 12,
+        overflow: 'hidden',
+        boxShadow: '0 12px 48px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)',
+        border: '1px solid #1e1e1e',
+        background: '#111',
+        userSelect: 'none',
+      }}
+    >
+      {/* Title bar — drag handle */}
+      <div
+        onMouseDown={onDragStart}
+        onTouchStart={onDragStart}
+        style={{
+          height: 36,
+          background: 'linear-gradient(90deg, #1a0000, #1e1e1e)',
+          borderBottom: '1px solid #2a2a2a',
+          display: 'flex', alignItems: 'center', padding: '0 10px', gap: 8,
+          cursor: 'grab',
+          flexShrink: 0,
+        }}
+      >
+        {/* Drag grip */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, opacity: 0.4, marginRight: 2 }}>
+          {[0,1,2].map(i => <div key={i} style={{ display: 'flex', gap: 2 }}>{[0,1].map(j => <div key={j} style={{ width: 2.5, height: 2.5, borderRadius: '50%', background: '#fff' }} />)}</div>)}
+        </div>
+
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff0000', display: 'inline-block', boxShadow: '0 0 8px #ff0000', flexShrink: 0 }} />
+        <span style={{ fontSize: 11, color: '#ff4444', fontWeight: 700, fontFamily: 'system-ui', letterSpacing: 0.5 }}>LIVE STREAM</span>
+        <span style={{ fontSize: 10, color: '#555', fontFamily: 'system-ui', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</span>
+
+        {/* Size presets */}
+        <div style={{ display: 'flex', gap: 3 }}>
+          {sizes.map(s => (
+            <button key={s.label} onMouseDown={e => e.stopPropagation()} onClick={() => setSize({ w: s.w, h: s.h })}
+              style={{ width: 20, height: 20, borderRadius: 4, border: 'none', background: size.w === s.w ? '#444' : 'transparent', color: size.w === s.w ? '#fff' : '#555', cursor: 'pointer', fontSize: 10, fontFamily: 'system-ui', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.label}</button>
+          ))}
+        </div>
+
+        <a href={url} target="_blank" rel="noreferrer" onMouseDown={e => e.stopPropagation()}
+          style={{ fontSize: 10, color: '#666', fontFamily: 'system-ui', textDecoration: 'none', padding: '2px 7px', border: '1px solid #333', borderRadius: 4 }}>↗</a>
+
+        <button onMouseDown={e => e.stopPropagation()} onClick={() => setMinimized(v => !v)}
+          style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px' }}>{minimized ? '▲' : '▼'}</button>
+        <button onMouseDown={e => e.stopPropagation()} onClick={onClose}
+          style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
+      </div>
+
+      {/* Player */}
+      {!minimized && (
+        <div style={{ position: 'relative', height: size.h, background: '#000' }}>
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&modestbranding=1`}
+            title="YouTube Live Stream"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+          />
+          {/* Resize handle */}
+          <div
+            onMouseDown={onResizeStart}
+            onTouchStart={onResizeStart}
+            style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 18, height: 18,
+              cursor: 'nwse-resize',
+              display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
+              padding: 3,
+            }}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M9 1L1 9M9 5L5 9M9 9" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
